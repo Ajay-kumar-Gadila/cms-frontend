@@ -1,77 +1,45 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-
-const fetchUsers = async () => {
-  try {
-    const response = await axios.get('http://localhost:5000/api/users');
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching users:', error);
-    return [];
-  }
-};
-
-const addUser = async (name, email) => {
-  try {
-    const response = await axios.post('http://localhost:5000/api/users', { name, email });
-    return response.data;
-  } catch (error) {
-    console.error('Error adding user:', error);
-    return null;
-  }
-};
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Sidebar from './components/Sidebar';
+import Department from './components/Department';
+import Course from './components/Course';
+import Subjects from './components/Subjects';
+import Examination from './components/Examination';
+import Results from './components/Results';
+import Academics from './components/Academics';
+import Signup from './components/Signup';  // Import Signup component
+import Signin from './components/Signin';  // Import Signin component
 
 function App() {
-  const [users, setUsers] = useState([]);
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-
-  useEffect(() => {
-    fetchUsers().then(data => setUsers(data));
-  }, []);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const newUser = await addUser(name, email);
-    if (newUser) {
-      setUsers([...users, newUser]);
-      setName('');
-      setEmail('');
-    }
-  };
-
   return (
-    <div>
-      <h1>Users</h1>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Name"
-          required
-        />
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="Email"
-          required
-        />
-        <button type="submit">Add User</button>
-      </form>
-      <ul>
-        {users.length > 0 ? (
-          users.map(user => (
-            <li key={user.id}>
-              Name: {user.name} - Email: {user.email}
-            </li>
-          ))
-        ) : (
-          <li>No users found</li>
-        )}
-      </ul>
-    </div>
+    <Router>
+      <div className="flex h-screen">
+        <Routes>
+          {/* Public routes */}
+          <Route path="/signin" element={<Signin />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/" element={<Signin />} /> {/* Show Signin page at root path */}
+
+          {/* Protected routes */}
+          <Route path="/hello/*" element={
+            <div className="flex h-screen">
+              <Sidebar />
+              <div className="flex-grow p-4">
+                <Routes>
+                  <Route path="department" element={<Department />} />
+                  <Route path="course" element={<Course />} />
+                  <Route path="subjects" element={<Subjects />} />
+                  <Route path="examination" element={<Examination />} />
+                  <Route path="results" element={<Results />} />
+                  <Route path="academics" element={<Academics />} />
+                  <Route path="/" element={<Department />} /> {/* Default route inside /hello */}
+                </Routes>
+              </div>
+            </div>
+          } />
+        </Routes>
+      </div>
+    </Router>
   );
 }
 
